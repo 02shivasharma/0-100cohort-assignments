@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script>
+    let globalId = 1;
+    let todoState = [];
+    let oldTodoState = [];
+
+    function addTodoToDom(todo) {
+      const parent = document.getElementById("todos");
+
+      const todoContainer = document.createElement("div");
+      todoContainer.id = `todo-${todo.id}`;
+      todoContainer.className = 'todo-item';
+
+      const titleDiv = document.createElement("div");
+      titleDiv.innerHTML = todo.title;
+      titleDiv.className = 'todo-title';
+
+      const descriptionDiv = document.createElement("div");
+      descriptionDiv.innerHTML = todo.description;
+      descriptionDiv.className = 'todo-description';
+
+      const idDiv = document.createElement("div");
+      idDiv.innerHTML = `ID: ${todo.id}`;
+      idDiv.className = 'todo-id';
+
+      todoContainer.appendChild(titleDiv);
+      todoContainer.appendChild(descriptionDiv);
+      todoContainer.appendChild(idDiv);
+
+      parent.appendChild(todoContainer);
+    }
+
+    function removeTodoFromDom(todoId) {
+      const todoElement = document.getElementById(`todo-${todoId}`);
+      if (todoElement) {
+        todoElement.remove();
+      }
+    }
+
+    function updateTodoInDom(oldTodo, newTodo) {
+      const todoElement = document.getElementById(`todo-${newTodo.id}`);
+      if (todoElement) {
+        todoElement.querySelector('.todo-title').innerHTML = newTodo.title;
+        todoElement.querySelector('.todo-description').innerHTML = newTodo.description;
+      }
+    }
+
+    function updateState(newTodos) {
+      const added = [];
+      const deleted = [];
+      const updated = [];
+
+      const oldTodoMap = {};
+      oldTodoState.forEach(todo => {
+        oldTodoMap[todo.id] = todo;
+      });
+
+      const newTodoMap = {};
+      newTodos.forEach(todo => {
+        newTodoMap[todo.id] = todo;
+        if (!oldTodoMap[todo.id]) {
+          added.push(todo);
+        } else if (oldTodoMap[todo.id].title !== todo.title || oldTodoMap[todo.id].description !== todo.description) {
+          updated.push({ old: oldTodoMap[todo.id], new: todo });
+        }
+      });
+
+      oldTodoState.forEach(todo => {
+        if (!newTodoMap[todo.id]) {
+          deleted.push(todo.id);
+        }
+      });
+
+      added.forEach(todo => addTodoToDom(todo));
+      deleted.forEach(todoId => removeTodoFromDom(todoId));
+      updated.forEach(({ old, new: newTodo }) => updateTodoInDom(old, newTodo));
+
+      oldTodoState = newTodos;
+    }
+
+    function addTodo() {
+      const title = document.getElementById("title").value;
+      const description = document.getElementById("description").value;
+      todoState.push({
+        title: title,
+        description: description,
+        id: globalId++,
+      })
+      updateState(todoState);
+    }
+  </script>
+</head>
+
+<body>
+  <input type="text" id="title" placeholder="Todo title"></input> <br /><br />
+  <input type="text" id="description" placeholder="Todo description"></input> <br /><br />
+  <button onclick="addTodo()">Add todo</button>
+  <br /> <br />
+
+  <div id="todos"></div>
+</body>
+
+</html>

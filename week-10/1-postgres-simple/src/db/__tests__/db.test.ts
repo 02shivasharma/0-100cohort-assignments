@@ -2,6 +2,7 @@ import { client } from '../..';
 import { createUser, getUser } from '../user';
 import { createTables, dropTables } from '../setup';
 import { createTodo, updateTodo, getTodos } from '../todo';
+import { string } from 'zod';
 
 beforeAll(async () => {
     await client.connect();
